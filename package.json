@@ -1,0 +1,16 @@
+{
+  "name": "SampleApp",
+  "version": "0.0.1",
+  "private": true,
+  "main": "server",
+  "engines": {
+    "node": ">=0.8.0"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "*",
+    "googleapis": "^29.0.0",
+    "morgan": "^1.9.0",
+    "serve-favicon": "^2.5.0"
+  }
+}
