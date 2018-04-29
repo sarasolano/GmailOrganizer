@@ -12,13 +12,13 @@ let express = require('express'),
     bodyParser = require('body-parser');
 
 app.set('port', process.env.PORT || 8080);
-app.use(express.static(__dirname));
-app.use(express.static('../js'));
-app.use(express.static('../css'));
-app.use(express.static('../templates'))
 app.use(express.static("."));
+app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname, '../js')));
+app.use(express.static(path.join(__dirname, '../css')));
+app.use(express.static(path.join(__dirname, '../templates')))
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-// app.use(logger);
+// app.use(logger('combined'));
 app.use(bodyParser.urlencoded({extended:false}));
 app.use(bodyParser.json());
 // app.use(express.cookieParser());
@@ -26,7 +26,7 @@ app.use(bodyParser.json());
 app.engine('html', engines.hogan); // tell Express to run .html files through Hogan
 
 
-app.set('views', __dirname + '/templates'); // tell Express where to find templates, in this case the '/templates' directory
+app.set('views', path.join(__dirname, '../templates')); // tell Express where to find templates, in this case the '/templates' directory
 app.set('view engine', 'html'); //register .html extension as template engine so we can render .html pages
 
 // serve static files
@@ -41,7 +41,11 @@ const googleAuth = require('google-auth-library');
 
 // start page. Shows google log-in button
 app.get('/', function (req, res) {
-	// add url to go to gmail
+	res.render('index.html');	
+})
+
+// start page. Shows google log-in button
+app.get('/oauth2callback', function (req, res) {
 	res.render('index.html');	
 })
 
@@ -49,33 +53,28 @@ app.listen(8080, function(){
     console.log('- Server listening on port 8080');
 });
 
-
 // redirect to google log-in (TODO: set this up)
 app.post('/goauth2', function (req, res) {
-	var code = req.query.code;
-	console.log("this is the token code: " + code);
-
-	gapi.client.getToken(code, function(err, tokens){
-    gapi.client.credentials = tokens;
-    getData();
-  });
+	console.log('goauth2')
+	gapi.client.authenticate(gapi.scopes.get)
+		.then(c => { // promise is not working
+			console.log(c)
+			let data = getProfile()
+			console.log(data)
+		})
+		.catch(console.error)
 
 	res.render("index.html")
-	// readClientSecret('client_secret.json')
-	// 	.then(clientSecretJson => {
-	// 		let clientSecret = JSON.parse(clientSecretJson);
- //    		return authorize(clientSecret);
-	// 	})
 });
 
-var getData = function() {
-  gapi.oauth.userinfo.get().withAuthClient(gapi.client).execute(function(err, results){
-      console.log(results);
-  });
-  gapi.gmail.users.messages.list().withAuthClient(gapi.client).execute(function(err, results){
-    console.log(results);
-  });
-};
+async function getProfile() {
+	console.log('getProfile')
+
+  const res = await gmail.users.getProfile({userId: 'me'})
+  console.log('getProfile: ' + res.data)
+
+  return res.data;
+}
 
 
 

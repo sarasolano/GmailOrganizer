@@ -1,26 +1,26 @@
-const SCOPES = ['https://mail.google.com/',
-  'https://www.googleapis.com/auth/gmail.modify',
-  'https://www.googleapis.com/auth/gmail.compose',
-  'https://www.googleapis.com/auth/gmail.send'];
+const path = require('path'),
+  fs = require('fs');
+
+const keyPath = path.join(__dirname, 'scopes.json');
+let scopes = { scopes: [''] };
+if (fs.existsSync(keyPath)) {
+  scopes = require(keyPath).scopes;
+}
 
 const {google} = require('googleapis'),
+    gclient = require('./gclient'),
     OAuth2Client = google.auth.OAuth2,
-    client = '558954110565-b7s34h1u4f269j4g7vshpa7hmbn6keb8.apps.googleusercontent.com',
-    secret = 'hePvKfRqScoXbzFQvcT1oa0b',
-    redirect = 'http://localhost:8080/oauth2callback',
-    oauth2Client = new OAuth2Client(client, secret, redirect),
-    gmail_auth_url = oauth2Client.generateAuthUrl({
-	    access_type: 'offline',
-	    scope: SCOPES
-	  }),
-    gmail = google.gmail('v1'),
+    gmail = google.gmail({
+      version: 'v1', 
+      auth: gclient.oAuth2Client
+    }),
     oauth2 = google.oauth2('v2');
 
 exports.ping = function() {
     console.log('pong');
 };
 
-module.exports.url = gmail_auth_url;
-module.exports.gmail = gmail;
-module.exports.oauth = oauth2;
-module.exports.client = oauth2Client;
+exports.gmail = gmail;
+exports.oauth = oauth2;
+exports.client = gclient;
+exports.scopes = scopes

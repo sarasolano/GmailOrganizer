@@ -2,6 +2,7 @@
 
 /**
  * This is used by several samples to easily provide an oauth2 workflow.
+ * Credit: GOOGLE API SampleClient
  */
 
 const {google} = require('googleapis');
