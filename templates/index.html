@@ -3,11 +3,13 @@
 <head>
   <title>GOrganizer</title>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="roomName" content="{{roomName}}">
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
   <link rel="shortcut icon" type="image/x-icon" href="favicon-32x32.png" />
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
 </head>
 <body>
     <nav class="navbar">
@@ -28,7 +30,7 @@
             </div>
         </div>
         <ul class="nav navbar-nav navbar-right" style="margin-top: 45px; margin-right: 20px;">
-            <li><a href="#"><span class="glyphicon glyphicon-user"></span> Username</a></li>
+            <li><a href="#"><span class="glyphicon glyphicon-user"></span><span id = 'username'>Username</span></a></li>
             <li><a href="#"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
         </ul>
 
@@ -44,7 +46,9 @@
             <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#favorites" style="width: 100%;">Contact Favorites</button>
         </div>
         <div class="col-sm-4">
-            <button type="button" class="btn btn-warning btn-lg" data-toggle="modal" data-target="#reminders" style="width: 100%;">Reminders</button>
+            <button type="button" class="btn btn-warning btn-lg" data-toggle="modal" data-target="#reminders" style="width: 100%;">Reminders
+                <span class="badge" id="remind_count">1</span>
+            </button>
         </div>
         <div class="col-sm-4">
             <button type="button" class="btn btn-success btn-lg" data-toggle="modal" data-target="#alerts" style="width: 100%;">Settings</button>
@@ -78,6 +82,7 @@
         </div>
       </div>
     </div>
+
 
 
     <table class="table table-bordered">
@@ -207,10 +212,35 @@
             </div>
             <div class="modal-body">
               <p>Reminder Placeholder</p>
+              <table class="table table-bordered table-striped"  id="remind_table">
+                <thead>
+                  <tr>
+                    <th>Reminder</th>
+                    <th>Completed</th>
+                  </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Send Draft to Jimmy</td>
+                        <td>
+                            <input type="checkbox" class ="remind_check">
+                        </td>
+                    </tr>
+                </tbody>
+              </table>
+              <h3>New Reminder:</h3>
+              <div class="container-fluid">
+                  <form class="form" method = "POST" action="/action_page.php" id = "new_R">
+                      <div class="form-group">
+                          <label for="reminder_text">Reminder</label>
+                          <textarea class="form-control" id="reminder_text"></textarea>
+                      </div>
+                      <button type="submit" class="btn btn-primary">Submit</button>
+                  </form>
+              </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#new_reminder">New</button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" id = "remind_button">Save Changes</button>
             </div>
           </div>
 
@@ -246,18 +276,87 @@ function newContact(event) {
     var last = $("#fn").val().substr($("#fn").val().indexOf(' ')+1);
     var email = $("#email").val();
     $('#myTable').append('<tr><td>' + first + '</td><td>'+ last +'</td><td>'+ email + '</td></tr>');
+    $.post('/' + meta("roomName") + '/favorites', {firstName: first, lastName: last, Email: email,  user_id : meta("roomName")}, function(res){
+        console.log("check");
+    });
 }
+function newremind(event) {
+    event.preventDefault();
+    var text = $("#reminder_text").val();
+    $("#new_R")[0].reset();
+    if (text != '') {
+        $('#remind_table').append('<tr><td>' + text + '</td><td><input type="checkbox" class ="remind_check"></td></tr>');
+        num_reminders += 1;
+        $('#remind_count').text(num_reminders);
+
+        $.post('/' + meta("roomName") + '/reminders', {reminder_text: text, user_id : meta("roomName")}, function(res){
+            console.log("check");
+        });
+    }
+
+}
+
+function meta(name) {
+        var tag = document.querySelector('meta[name=' + name + ']');
+        if (tag != null)
+            return tag.content;
+        return '';
+    }
 $(document).ready(function(){
     var newcontact = $('#newContact').submit(newContact);
+    var newreminder = $("#new_R").submit(newremind);
+});
+var num_notifs = 3;
+var user_email = '';
+var user_id = -1;
+var favorites = [];
+var num_reminders = 1;
+$.get('http://localhost:8080/:' + meta("roomName") + '/profile', function(data, status) {
+     if (status === "success") {
+        num_notifs = data[0].notificationCount;
+        user_email = data[0].email;
+        user_id = data[0].user_id;
+        $("#username").text(user_email);
+        $('#not_count').text(num_notifs);
+     } else {
+        console.log(status)
+     }
+  });
+
+$.get('http://localhost:8080/:' + meta("roomName") + '/favorites', function(data, status) {
+   if (status === "success") {
+      favorites = data;
+      for (x = 0; x < data.length; x++) {
+              $('#myTable').append('<tr><td>' + data[x].first + '</td><td>'+ data[x].last +'</td><td>'+ data[x].email + '</td></tr>');
+          }
+
+   } else {
+      console.log(status)
+   }
 });
 
-var num_notifs = 3;
+
+
 
 $('.notifs').click(function() {
     $(this).remove();
     num_notifs -= 1;
     $('#not_count').text(num_notifs);
+
 });
+
+$("#remind_button").click(function() {
+    $("#remind_table tbody tr td").each(function(i, td){
+        if (i%2 != 0) {
+            if($(td).children().is(":checked")) {
+                $(td).parent().remove();
+                num_reminders -= 1;
+            }
+        }
+
+    });
+    $('#remind_count').text(num_reminders);
+})
 
 </script>
 
