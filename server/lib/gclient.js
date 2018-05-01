@@ -14,6 +14,10 @@ const destroyer = require('server-destroy');
 const fs = require('fs');
 const path = require('path');
 
+const TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
+    process.env.USERPROFILE) + '/.credentials/';
+var TOKEN_PATH = TOKEN_DIR + 'gmail-gorganizer.json';
+
 const keyPath = path.join(__dirname, 'client_secret.json');
 let keys = { redirect_uris: [''] };
 if (fs.existsSync(keyPath)) {
@@ -35,32 +39,48 @@ class GClient {
   // Open an http server to accept the oauth callback. In this
   // simple example, the only request to our webserver is to
   // /oauth2callback?code=<code>
-  async authenticate (scopes) {
+  authenticate (req) {
     return new Promise((resolve, reject) => {
-      // grab the url that will be used for authorization
-      this.authorizeUrl = this.oAuth2Client.generateAuthUrl({
-        access_type: 'offline',
-        scope: scopes.join(' ')
-      });
-      const server = http.createServer(async (req, res) => {
-        try {
-          if (req.url.indexOf('/oauth2callback') > -1) {
-            const qs = querystring.parse(url.parse(req.url).query);
-            res.end('Authentication successful! Please return to the console.');
-            server.destroy();
-            const {tokens} = await this.oAuth2Client.getToken(qs.code);
-            this.oAuth2Client.credentials = tokens;
-            resolve(this.oAuth2Client);
-          }
-        } catch (e) {
-          reject(e);
+      try {
+        if (req.url.indexOf('/oauth2callback') > -1) {
+          const qs = querystring.parse(url.parse(req.url).query);
+          console.log('Authentication successful!');
+
+          var client = this.oAuth2Client
+          fs.readFile(TOKEN_PATH, function(err, token) {
+            if (err) {
+                this.oAuth2Client.getToken(qs.code, function(err, token) {
+                if (err) {
+                  console.log('Error while trying to retrieve access token', err);
+                  return;
+                }
+
+                client.credentials = token
+                storeToken(token);
+              });
+            } else {
+              client.credentials = JSON.parse(token);
+            }
+            resolve(client);
+          })
+          this.oAuth2Client = client
         }
-      }).listen(3000, () => {
-        // open the browser to the authorize url to start the workflow
-        opn(this.authorizeUrl, {wait: false}).then(cp => cp.unref());
-      });
-      destroyer(server);
+      } catch (e) {
+        reject(e);
+      }
     });
+  }
+
+  storeToken(token) {
+    try {
+      fs.mkdirSync(TOKEN_DIR)
+    } catch (err) {
+      if (err.code != 'EEXIST') {
+        throw err;
+      }
+    }
+    fs.writeFile(TOKEN_PATH, JSON.stringify(token));
+    console.log('Token stored to ' + TOKEN_PATH);
   }
 }
 

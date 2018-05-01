@@ -24,3 +24,12 @@ exports.gmail = gmail;
 exports.oauth = oauth2;
 exports.client = gclient;
 exports.scopes = scopes
+
+var getProfile = async function() {
+  console.log('gapi.getProfile')
+  const res = await gmail.users.getProfile({userId: 'me', auth: gclient.oAuth2Client});
+  return res.data;
+}
+
+exports.getProfile = getProfile;
+
