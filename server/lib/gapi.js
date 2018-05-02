@@ -33,3 +33,8 @@ var getProfile = async function() {
 
 exports.getProfile = getProfile;
 
+var listEmails = async function() {
+  const res = await gmail.users.messages.list({ userId: 'me', auth: gclient.oAuth2Client});
+  console.log(res.data);
+  return res.data;
+}

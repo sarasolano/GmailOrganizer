@@ -9,8 +9,8 @@ let express = require('express'),
     bodyParser = require('body-parser'),
     favicon = require('serve-favicon'),
     logger = require('morgan')
-    bodyParser = require('body-parser'),
-    Enum = require('enum');;
+    bodyParser = require('body-parser');
+    // Enum = require('node-enum');
 
 app.set('port', process.env.PORT || 8080);
 app.use(express.static("."));
@@ -50,13 +50,9 @@ app.get('/', function (req, res) {
 app.get('/oauth2callback', function (req, res) {
 	gapi.client.authenticate(req)
 		.then(c => { // promise is not working
-			console.log(c)
 			gapi.getProfile().then(d => {
-				// save to database. change content in index html
-				// save token in file
 				console.log(d)
-
-			})
+			}).catch(e => console.log(e))
 		})
 		.catch(function(e) {
 			console.log(e)
@@ -86,7 +82,10 @@ app.post('/goauth2', function (req, res) {
  **/
 app.get('/:userId/profile', function(req, res) {
 	// call the database for current user
-	//res.render('profile.html')
+	gapi.getProfile().then(d => {
+		console.log(d)
+	}).catch(e => console.log(e))
+	res.render('profile.html', {'userId' : req.params.userId})
 })
 
 /******** USER.FAVORITES ************/
@@ -104,7 +103,7 @@ app.post('/:userId/favorites/:id')
 
 /*************** USER.NOTIFICATIONS ***************/
 
-const NOTIFICATION_TYPE = new Enum([ "UNREAD_EMAIL", "RECEIVED_MESSAGE"]);
+// const NOTIFICATION_TYPE = new Enum([ "UNREAD_EMAIL", "RECEIVED_MESSAGE"]);
 
 app.post('/:userId/notifications')
 
@@ -120,7 +119,7 @@ app.post('/:userId/notifications/start')
 
 /*************** USER.REMINDERS ****************/
 
-const REMINDER_TYPE = new Enum(["SEND_DRAFT", "SEND_REPLY", "EMAIL_DURATION"]);
+// const REMINDER_TYPE = new Enum(["SEND_DRAFT", "SEND_REPLY", "EMAIL_DURATION"]);
 
 
 // start server

@@ -47,40 +47,37 @@ class GClient {
           console.log('Authentication successful!');
 
           var client = this.oAuth2Client
-          fs.readFile(TOKEN_PATH, function(err, token) {
-            if (err) {
-                this.oAuth2Client.getToken(qs.code, function(err, token) {
+          // fs.readFile(TOKEN_PATH, function(err, token) {
+          //   if (err) {
+              client.getToken(qs.code, function(err, token) {
                 if (err) {
                   console.log('Error while trying to retrieve access token', err);
                   return;
                 }
 
                 client.credentials = token
-                storeToken(token);
+                try {
+                  fs.mkdirSync(TOKEN_DIR)
+                } catch (err) {
+                  if (err.code != 'EEXIST') {
+                    throw err;
+                  }
+                }
+                fs.writeFile(TOKEN_PATH, JSON.stringify(token));
+                console.log('Token stored to ' + TOKEN_PATH);
               });
-            } else {
-              client.credentials = JSON.parse(token);
-            }
+            // } else {
+            //   client.credentials = JSON.parse(token);
+            // }
             resolve(client);
-          })
+          // });
+          
           this.oAuth2Client = client
         }
       } catch (e) {
         reject(e);
       }
     });
-  }
-
-  storeToken(token) {
-    try {
-      fs.mkdirSync(TOKEN_DIR)
-    } catch (err) {
-      if (err.code != 'EEXIST') {
-        throw err;
-      }
-    }
-    fs.writeFile(TOKEN_PATH, JSON.stringify(token));
-    console.log('Token stored to ' + TOKEN_PATH);
   }
 }
 
