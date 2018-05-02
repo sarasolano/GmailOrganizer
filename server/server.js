@@ -1,6 +1,6 @@
 "use strict"
 
-let express = require('express'),
+const express = require('express'),
     app = express(),
     http = require('http'),
     path = require('path'),
@@ -8,22 +8,30 @@ let express = require('express'),
     engines = require('consolidate'),
     bodyParser = require('body-parser'),
     favicon = require('serve-favicon'),
-    logger = require('morgan')
-    bodyParser = require('body-parser');
+    logger = require('morgan'),
+    cookieParser = require('cookie-parser'),
+    expressValidator = require('express-validator'),
+    session = require('express-session');
     // Enum = require('node-enum');
 
-app.set('port', process.env.PORT || 8080);
+const PORT = 8080;
+
+app.set('port', process.env.PORT || PORT);
 app.use(express.static("."));
 app.use(express.static(__dirname));
+app.use(express.static('public'))
 app.use(express.static(path.join(__dirname, '../js')));
 app.use(express.static(path.join(__dirname, '../css')));
 app.use(express.static(path.join(__dirname, '../templates')))
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('combined'));
-app.use(bodyParser.urlencoded({extended:false}));
+app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
-app.engine('html', engines.hogan); // tell Express to run .html files through Hogan
+app.use(cookieParser())
+app.use(session({ secret: 'GOrganizer', resave: false, saveUninitialized: true, }));
+app.use(expressValidator());
 
+app.engine('html', engines.hogan); // tell Express to run .html files through Hogan
 
 app.set('views', path.join(__dirname, '../templates')); // tell Express where to find templates, in this case the '/templates' directory
 app.set('view engine', 'html'); //register .html extension as template engine so we can render .html pages
@@ -50,26 +58,30 @@ app.get('/', function (req, res) {
 app.get('/oauth2callback', function (req, res) {
 	gapi.client.authenticate(req)
 		.then(c => { // promise is not working
-			gapi.getProfile().then(d => {
-				console.log(d)
-			}).catch(e => console.log(e))
+      req.session.token = c.credentials
+
+      gapi.getProfile().then(d => {
+        console.log(d)
+      }).catch(e => console.log(e))
+
+      res.redirect('/')
 		})
 		.catch(function(e) {
 			console.log(e)
 		})
-	res.render('index.html');	
 })
 
 // redirect to google log-in (TODO: set this up)
-app.post('/goauth2', function (req, res) {
-  // grab the url that will be used for authorization
+app.get('/goauth2', 
+  function (req, res) {
+  //grab the url that will be used for authorization
   gapi.client.authorizeUrl = gapi.client.oAuth2Client.generateAuthUrl({
     access_type: 'offline',
     scope: gapi.scopes.get.join(' ')
   });
 
-  // open the browser to the authorize url to start the workflow
-  opn(gapi.client.authorizeUrl, {wait: false}).then(cp => cp.unref());
+  //open the browser to the authorize url to start the workflow
+  res.redirect(gapi.client.authorizeUrl);
 });
 
 
@@ -84,8 +96,8 @@ app.get('/:userId/profile', function(req, res) {
 	// call the database for current user
 	gapi.getProfile().then(d => {
 		console.log(d)
+    res.render('profile.html', {'userId' : req.params.userId, 'email' : d.emailAddress})
 	}).catch(e => console.log(e))
-	res.render('profile.html', {'userId' : req.params.userId})
 })
 
 /******** USER.FAVORITES ************/
@@ -95,7 +107,9 @@ app.get('/:userId/favorites', function(req, res) {
 })
 
 // create
-app.post('/:userId/favorites')
+app.post('/:userId/favorites' function(req, res) {
+  
+})
 
 // delete
 app.post('/:userId/favorites/:id')
@@ -123,8 +137,8 @@ app.post('/:userId/notifications/start')
 
 
 // start server
-app.listen(8080, function(){
-    console.log('- Server listening on port 8080');
+app.listen(PORT, function(){
+    console.log('- Server listening on port ', PORT);
 });
 
 
