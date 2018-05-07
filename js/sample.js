@@ -1,10 +1,9 @@
 $(document).ready(function(){
-	$('#username').click(function(event) {
-		$.post('/goauth2', function(data) {		
-			if (!data) {
-				console.log('could not create new chat room')
-				return
-			}
-		})
+	$('#google-signin').click(function(event) {
+		$.get('/goauth2');
+	});
+
+	$('#logout').click(function(event) {
+		$.get('/logout');
 	})
 })

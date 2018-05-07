@@ -56,20 +56,21 @@ class GClient {
                 }
 
                 client.credentials = token
-                try {
-                  fs.mkdirSync(TOKEN_DIR)
-                } catch (err) {
-                  if (err.code != 'EEXIST') {
-                    throw err;
-                  }
-                }
-                fs.writeFile(TOKEN_PATH, JSON.stringify(token));
-                console.log('Token stored to ' + TOKEN_PATH);
+                // try {
+                //   fs.mkdirSync(TOKEN_DIR)
+                // } catch (err) {
+                //   if (err.code != 'EEXIST') {
+                //     throw err;
+                //   }
+                // }
+                // fs.writeFile(TOKEN_PATH, JSON.stringify(token));
+                // console.log('Token stored to ' + TOKEN_PATH);
+                resolve(client);
               });
             // } else {
             //   client.credentials = JSON.parse(token);
             // }
-            resolve(client);
+            
           // });
           
           this.oAuth2Client = client

@@ -3,7 +3,7 @@
 <head>
   <title>GOrganizer</title>
   <meta charset="utf-8">
-  <meta name="roomName" content="{{roomName}}">
+  <meta name="userId" content="{{userId}}">
   <!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
   <!-- <link rel="shortcut icon" type="image/x-icon" href="favicon-32x32.png" /> -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -30,8 +30,8 @@
             </div>
         </div>
         <ul class="nav navbar-nav navbar-right" style="margin-top: 45px; margin-right: 20px;">
-            <li><a href="#"><span class="glyphicon glyphicon-user"></span><span id = 'username'>Username</span></a></li>
-            <li><a href="#"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+            <li><a href="#"><span class="glyphicon glyphicon-user"></span><span id = 'username'></span></a></li>
+            <li><a href="#"><span class="glyphicon glyphicon-log-out"></span> <span id='logout'>Logout</span></a></li>
         </ul>
 
       </div>
@@ -290,7 +290,7 @@ function newContact(event) {
     var last = $("#fn").val().substr($("#fn").val().indexOf(' ')+1);
     var email = $("#email").val();
     $('#myTable').append('<tr><td>' + first + '</td><td>'+ last +'</td><td>'+ email + '</td></tr>');
-    $.post('/' + meta("roomName") + '/favorites', {firstName: first, lastName: last, Email: email,  user_id : meta("roomName")}, function(res){
+    $.post('/' + meta("userId") + '/addFavorite', {firstName: first, lastName: last, email: email}, function(res){
         console.log("check");
     });
 }
@@ -302,7 +302,7 @@ function newremind(event) {
         $('#remind_table').append('<tr><td>' + text + '</td><td><input type="checkbox" class ="remind_check"></td></tr>');
         num_reminders += 1;
         $('#remind_count').text(num_reminders);
-        $.post('/' + meta("roomName") + '/reminders', {reminder_text: text, user_id : meta("roomName")}, function(res){
+        $.post('/' + meta("userId") + '/addReminder', {reminder_text: text}, function(res){
             console.log("check");
         });
     }
@@ -317,6 +317,8 @@ $(document).ready(function(){
     $("#folder_holder").hide();
     var newcontact = $('#newContact').submit(newContact);
     var newreminder = $("#new_R").submit(newremind);
+
+    $('#username').text(meta('userId'));
 });
 var num_notifs = 3;
 var user_email = '';
@@ -326,27 +328,27 @@ var num_reminders = 1;
 var num_folders = 0;
 var folder_colors = [ "#007bff","#28a745"," #17a2b8", "#dc3545", "#343a40", "#6c757d"];
 
-$.get('http://localhost:8080/:' + meta("roomName") + '/profile', function(data, status) {
-     if (status === "success") {
-        num_notifs = data[0].notificationCount;
-        user_email = data[0].email;
-        user_id = data[0].user_id;
-        $("#username").text(user_email);
-        $('#not_count').text(num_notifs);
-     } else {
-        console.log(status)
-     }
-  });
-$.get('http://localhost:8080/:' + meta("roomName") + '/favorites', function(data, status) {
-   if (status === "success") {
-      favorites = data;
-      for (x = 0; x < data.length; x++) {
-              $('#myTable').append('<tr><td>' + data[x].first + '</td><td>'+ data[x].last +'</td><td>'+ data[x].email + '</td></tr>');
-          }
-   } else {
-      console.log(status)
-   }
-});
+// $.get('http://localhost:8080/profile', function(data, status) {
+//      if (status === "success") {
+//         num_notifs = data[0].notificationCount;
+//         user_email = data[0].email;
+//         user_id = data[0].user_id;
+//         $("#username").text(user_email);
+//         $('#not_count').text(num_notifs);
+//      } else {
+//         console.log(status)
+//      }
+//   });
+// $.get('http://localhost:8080/:' + meta("userId") + '/favorites', function(data, status) {
+//    if (status === "success") {
+//       favorites = data;
+//       for (x = 0; x < data.length; x++) {
+//               $('#myTable').append('<tr><td>' + data[x].first + '</td><td>'+ data[x].last +'</td><td>'+ data[x].email + '</td></tr>');
+//           }
+//    } else {
+//       console.log(status)
+//    }
+// });
 $('.notifs').click(function() {
     $(this).remove();
     num_notifs -= 1;

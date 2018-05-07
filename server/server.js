@@ -5,14 +5,15 @@ const express = require('express'),
     http = require('http'),
     path = require('path'),
     gapi = require('./lib/gapi'),
+    database = require('./data/database'),
     engines = require('consolidate'),
     bodyParser = require('body-parser'),
     favicon = require('serve-favicon'),
     logger = require('morgan'),
     cookieParser = require('cookie-parser'),
     expressValidator = require('express-validator'),
-    session = require('express-session');
-    // Enum = require('node-enum');
+    session = require('express-session'),
+    opn = require('opn');
 
 const PORT = 8080;
 
@@ -42,14 +43,27 @@ app.use(express.static('dist'));
 // GOOGLE OAUTH
 const fs = require('fs');
 const url = require('url');
-const opn = require('opn');
 const readline = require('readline');
 const google = require('googleapis');
 const googleAuth = require('google-auth-library');
 
+app.get('/', function(req, res) {
+  res.redirect('/login'); 
+})
+
 // start page. Shows google log-in button
-app.get('/', function (req, res) {
-	res.render('index.html');	
+app.get('/login', function (req, res) {
+	res.render('login.html');	
+})
+
+app.get('/logout', function(req, res) {
+  req.session.destroy((err) => {
+    if (err) {
+      console.log(err)
+    } 
+    res.render('login.html')
+  })
+  
 })
 
 /************ Gmail auth ***************/
@@ -60,11 +74,9 @@ app.get('/oauth2callback', function (req, res) {
 		.then(c => { // promise is not working
       req.session.token = c.credentials
 
-      gapi.getProfile().then(d => {
-        console.log(d)
-      }).catch(e => console.log(e))
+      res.redirect('/profile')
 
-      res.redirect('/')
+      console.log(req.session.token)
 		})
 		.catch(function(e) {
 			console.log(e)
@@ -72,44 +84,58 @@ app.get('/oauth2callback', function (req, res) {
 })
 
 // redirect to google log-in (TODO: set this up)
-app.get('/goauth2', 
-  function (req, res) {
+app.get('/goauth2', function (req, res) {
+  // check if token exits and is not expired
+  if (req.session.token) {
+
+  }
+
   //grab the url that will be used for authorization
   gapi.client.authorizeUrl = gapi.client.oAuth2Client.generateAuthUrl({
     access_type: 'offline',
-    scope: gapi.scopes.get.join(' ')
+    scope: gapi.scopes.get
   });
 
   //open the browser to the authorize url to start the workflow
-  res.redirect(gapi.client.authorizeUrl);
+  opn(gapi.client.authorizeUrl);
 });
 
 
 /************* GOrganizer API *************/
 
-/************* USER ************/
+// ************ USER ***********
 
 /**
  * Get the profile page for the :userId user
  **/
-app.get('/:userId/profile', function(req, res) {
+app.get('/profile', function(req, res) {
 	// call the database for current user
+  if (!req.session.token) {
+    res.redirect('/goauth2');
+    return;
+  }
+  database.initilize()
+  gapi.client.credentials = req.session.token;
 	gapi.getProfile().then(d => {
 		console.log(d)
-    res.render('profile.html', {'userId' : req.params.userId, 'email' : d.emailAddress})
+    res.render('profile.html', {'userId' : d.emailAddress})
 	}).catch(e => console.log(e))
+})
+
+
+/******** USER.REMINDERS ************/
+
+app.post('/:userId/addReminder', function(req, res) {
+  res.send(database.addReminder(req.params.userId, req.text))
 })
 
 /******** USER.FAVORITES ************/
 
-app.get('/:userId/favorites', function(req, res) {
-
-})
-
 // create
-app.post('/:userId/favorites' function(req, res) {
-  
-})
+app.post('/:userId/addFavorite', function(req, res) {
+  res.send(database.addFavorite(req.params.userId, 
+    req.body.email, req.body.firstName, req.body.lastName))
+})  
 
 // delete
 app.post('/:userId/favorites/:id')
@@ -130,6 +156,51 @@ app.post('/:userId/notifications/')
 app.post('/:userId/notifications/stop')
 
 app.post('/:userId/notifications/start')
+
+
+// Notification sockets
+const notificationSecret = process.env.NOTIFICATION_SECRET || 'NOTIFICATION_SECRET';
+const notificationKey = process.env.NOTIFICATION_KEY || 'NOTIFICATION_KEY'
+const NOTIFICATION_EVENTS = {
+    newNotification: 'NEW_NOTIFICATION',
+    addFavorite: 'ADD_FAVORITE',
+    addedAsFavorite: 'ADDED_AS_FAVORITE',
+    unreadEmail: 'UNREAD_EMAIL',
+    receivedMessage: 'RECEIVED_MESSAGE'
+};
+
+// const server = http.createServer(app.app);
+
+// const io = require('socket.io')(server)
+ 
+// io.on('connection', (socket) => {
+//   console.log('a user connected')
+
+//   if (!validateConnection(socket.handshake.query)){
+//     return;
+//   }
+
+//   socket.on('join', (channel) => {
+//       socket.join(channel)
+//   });
+
+//   socket.on('notificaion', function(msg){
+//     socket.broadcast(msg)
+//   });
+
+//   socket.on('leave', (channel) => {
+//     socket.leave(channel);
+//   })
+
+// }); 
+
+function validateConnection(query) {
+  if (query.notificationKey !== notificationKey) {
+    return;
+  }
+
+  return true;
+}
 
 /*************** USER.REMINDERS ****************/
 

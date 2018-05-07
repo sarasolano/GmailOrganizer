@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>GOrganizer</title>
+  <meta charset="utf-8">
+  <meta name="userId" content="{{userId}}">
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
+  <!-- <link rel="shortcut icon" type="image/x-icon" href="favicon-32x32.png" /> -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+</head>
+<body>
+    <nav class="navbar">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#"><img src="logo.JPG" class="img-rounded" alt="Logo"  width="300" height="auto"></a>
+        </div>
+        <div class="navbar-right">
+            <div class="dropdown">
+                <button class="btn btn-danger dropdown-toggle navbar-btn" type="button"  data-toggle="dropdown" style="margin-top: 50px;">Notifications
+                    <span class="badge" id="not_count">3</span>
+                    <span class="caret"></span></button>
+                <ul class="dropdown-menu" id= "notifications">
+                  <li class = "notifs"><a href="#" >Notification 1  <span class="glyphicon glyphicon-ok-circle"></span></a></li>
+                  <li class = "notifs"><a href="#">Notification 2  <span class="glyphicon glyphicon-ok-circle"></span></a></li>
+                  <li class = "notifs"><a href="#">Notification 3  <span class="glyphicon glyphicon-ok-circle"></span></a></li>
+                </ul>
+            </div>
+        </div>
+        <ul class="nav navbar-nav navbar-right" style="margin-top: 45px; margin-right: 20px;">
+            <li><a href="#"><span class="glyphicon glyphicon-user"></span><span id = 'username'>Username</span></a></li>
+            <li><a href="#"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+        </ul>
+
+      </div>
+    </nav>
+    <div id="spacer" style="height: 75px;"></div>
+
+    <hr style="border: 1px dotted blue; border-style: none none dotted;"></hr>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-4">
+            <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#favorites" style="width: 100%;">Contact Favorites</button>
+        </div>
+        <div class="col-sm-4">
+            <button type="button" class="btn btn-warning btn-lg" data-toggle="modal" data-target="#reminders" style="width: 100%;">Reminders
+                <span class="badge" id="remind_count">1</span>
+            </button>
+        </div>
+        <div class="col-sm-4">
+            <button type="button" class="btn btn-success btn-lg" id = "folder_switch" style="width: 100%;">Folder View</button>
+        </div>
+      </div>
+    </div>
+    <div id = "emails_holder">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-sm-1">
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle navbar-btn" type="button"  data-toggle="dropdown" style="margin-top: 50px; margin-right: 5px;">Order By:
+                    <span class="caret"></span></button>
+                    <ul class="dropdown-menu">
+                      <li><a href="#">Sender</a></li>
+                      <li><a href="#">Priority</a></li>
+                      <li><a href="#">Date</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-sm-1">
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle navbar-btn" type="button"  data-toggle="dropdown" style="margin-top: 50px;">View:
+                    <span class="caret"></span></button>
+                    <ul class="dropdown-menu">
+                      <li><a href="#">Inbox</a></li>
+                      <li><a href="#">Drafts</a></li>
+                      <li><a href="#">Sent</a></li>
+                      <li><a href="#">Spam</a></li>
+                    </ul>
+                </div>
+            </div>
+          </div>
+        </div>
+
+
+
+        <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Priorty Level</th>
+                <th>Sender</th>
+                <th>Subject</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>3</td>
+                <td>sydney@example.com</td>
+                <td>HW5 Due</td>
+                <td>April, 6</td>
+              </tr>
+              <tr>
+                <td>1</td>
+                <td>sara@example.com</td>
+                <td>Project Meeting</td>
+                <td>April, 18</td>
+              </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id = "folder_holder">
+        <button type="button" class="btn btn-primary btn-lg" id="new_F" style="margin: 20px;">New Folder</button>
+        <div class= "container">
+            <table class="table" id = "folder_table">
+                <thead>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </thead>
+                <tbody >
+
+                </tbody>
+            </table>
+        </div>
+        </div>
+    </div>
+
+
+    <div class="container">
+      <!-- Modal -->
+      <div class="modal fade" id="favorites" role="dialog">
+        <div class="modal-dialog">
+
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">Favorites</h4>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered table-striped">
+                  <thead>
+                    <tr>
+                      <th>Firstname</th>
+                      <th>Lastname</th>
+                      <th>Email</th>
+                    </tr>
+                  </thead>
+                  <tbody id="myTable">
+                    <tr>
+                      <td>John</td>
+                      <td>Doe</td>
+                      <td>john@example.com</td>
+                    </tr>
+                    <tr>
+                      <td>Mary</td>
+                      <td>Moe</td>
+                      <td>mary@mail.com</td>
+                    </tr>
+                    <tr>
+                      <td>July</td>
+                      <td>Dooley</td>
+                      <td>july@greatstuff.com</td>
+                    </tr>
+                    <tr>
+                      <td>Anja</td>
+                      <td>Ravendale</td>
+                      <td>a_r@test.com</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <h3>New Contact Favorite:</h3>
+                <div class="container">
+                    <form class="form-inline" method = "POST" action="/action_page.php" id = "newContact">
+                        <div class="form-group">
+                            <label for="email">Email:</label>
+                            <input type="email" class="form-control" id="email" placeholder="Enter email" name="email">
+                        </div>
+                        <div class="form-group">
+                            <label for="pwd">Name:</label>
+                            <input type="text" class="form-control" id="fn" placeholder="First Last" name="first">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+
+    <div class="container">
+      <div class="modal fade" id="reminders" role="dialog">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">Reminders</h4>
+            </div>
+            <div class="modal-body">
+              <p>Reminder Placeholder</p>
+              <table class="table table-bordered table-striped"  id="remind_table">
+                <thead>
+                  <tr>
+                    <th>Reminder</th>
+                    <th>Completed</th>
+                  </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Send Draft to Jimmy</td>
+                        <td>
+                            <input type="checkbox" class ="remind_check">
+                        </td>
+                    </tr>
+                </tbody>
+              </table>
+              <h3>New Reminder:</h3>
+              <div class="container-fluid">
+                  <form class="form" method = "POST" action="/action_page.php" id = "new_R">
+                      <div class="form-group">
+                          <label for="reminder_text">Reminder</label>
+                          <textarea class="form-control" id="reminder_text"></textarea>
+                      </div>
+                      <button type="submit" class="btn btn-primary">Submit</button>
+                  </form>
+              </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" id = "remind_button">Save Changes</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+    <div class="container">
+      <div class="modal fade" id="new_reminder" role="dialog">
+        <div class="modal-dialog">
+
+          <!-- Modal content-->
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">New Reminder</h4>
+            </div>
+            <div class="modal-body">
+              <p>Reminder Form</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <style>
+    .fold {
+    border-radius: 25px;
+    width: 200px;
+    height: 150px;
+    text-align: center;
+    }
+    .folder_name {
+        display: inline-block;
+        text-align: center;
+        font-family: sans-serif;
+        color: white;
+        font-weight: bold;
+    }
+
+    </style>
+<script type="text/javascript" src="sample.js"></script>
+<script>
+function newContact(event) {
+    event.preventDefault();
+    var first = $("#fn").val().substr(0,$("#fn").val().indexOf(' '));
+    var last = $("#fn").val().substr($("#fn").val().indexOf(' ')+1);
+    var email = $("#email").val();
+    $('#myTable').append('<tr><td>' + first + '</td><td>'+ last +'</td><td>'+ email + '</td></tr>');
+    $.post('/' + meta("userId") + '/addFavorites', {firstName: first, lastName: last, Email: email,  user_id : meta("userId")}, function(res){
+        console.log("check");
+    });
+}
+function newremind(event) {
+    event.preventDefault();
+    var text = $("#reminder_text").val();
+    $("#new_R")[0].reset();
+    if (text != '') {
+        $('#remind_table').append('<tr><td>' + text + '</td><td><input type="checkbox" class ="remind_check"></td></tr>');
+        num_reminders += 1;
+        $('#remind_count').text(num_reminders);
+<<<<<<< c6945700998f6ebb03e4f35029cb280e7c830e12
+        $.post('/' + meta("roomName") + '/reminders', {reminder_text: text, user_id : meta("roomName")}, function(res){
+||||||| merged common ancestors
+
+        $.post('/' + meta("roomName") + '/reminders', {reminder_text: text, user_id : meta("roomName")}, function(res){
+=======
+
+        $.post('/' + meta("userId") + '/reminders', {reminder_text: text, user_id : meta("userId")}, function(res){
+>>>>>>> add notifications sockets
+            console.log("check");
+        });
+    }
+}
+function meta(name) {
+        var tag = document.querySelector('meta[name=' + name + ']');
+        if (tag != null)
+            return tag.content;
+        return '';
+    }
+$(document).ready(function(){
+    $("#folder_holder").hide();
+    var newcontact = $('#newContact').submit(newContact);
+    var newreminder = $("#new_R").submit(newremind);
+});
+var num_notifs = 3;
+var user_email = '';
+var user_id = -1;
+var favorites = [];
+var num_reminders = 1;
+var num_folders = 0;
+var folder_colors = [ "#007bff","#28a745"," #17a2b8", "#dc3545", "#343a40", "#6c757d"];
+
+$.get('http://localhost:8080/' + meta("userId") + '/profile', function(data, status) {
+  // add notifications sockets
+     if (status === "success") {
+        num_notifs = data[0].notificationCount;
+        user_email = data[0].email;
+        user_id = data[0].user_id;
+        $("#username").text(user_email);
+        $('#not_count').text(num_notifs);
+     } else {
+        console.log(status)
+     }
+  });
+
+$.get('http://localhost:8080/' + meta("userId") + '/favorites', function(data, status) {
+  // add notifications sockets
+   if (status === "success") {
+      favorites = data;
+      for (x = 0; x < data.length; x++) {
+              $('#myTable').append('<tr><td>' + data[x].first + '</td><td>'+ data[x].last +'</td><td>'+ data[x].email + '</td></tr>');
+          }
+   } else {
+      console.log(status)
+   }
+});
+$('.notifs').click(function() {
+    $(this).remove();
+    num_notifs -= 1;
+    $('#not_count').text(num_notifs);
+});
+$("#remind_button").click(function() {
+    $("#remind_table tbody tr td").each(function(i, td){
+        if (i%2 != 0) {
+            if($(td).children().is(":checked")) {
+                $(td).parent().remove();
+                num_reminders -= 1;
+            }
+        }
+    });
+    $('#remind_count').text(num_reminders);
+});
+$("#folder_switch").click(function(){
+    if($(this).text() === 'Folder View') {
+        $("#emails_holder").hide();
+        $("#folder_holder").show();
+        $(this).text('Email View');
+    } else {
+        $("#emails_holder").show();
+        $("#folder_holder").hide();
+        $(this).text('Folder View');
+
+    }
+});
+$("#new_F").click(function(){
+    var folder_n = prompt("Enter Folder Name:");
+    var inner = "<h2 class = folder_name>"+ folder_n+"</h2>"
+    if (folder_n == '') {
+        alert("Enter a valid folder Name");
+    } else {
+        if ((num_folders % 4) == 0) {
+            var color= folder_colors[Math.floor(Math.random() * folder_colors.length)];
+            $("#folder_table tbody").append("<tr><td><div class = 'fold' style=' background: "+ color +"'>"+ inner+"</div></td></tr>");
+            num_folders += 1;
+        } else {
+            var color= folder_colors[Math.floor(Math.random() * folder_colors.length)];
+            $("#folder_table tbody tr:last").append("<td><div class = 'fold' style=' background: "+ color +"'>"+ inner +"</div></td>");
+            num_folders += 1;
+        }
+    }
+
+
+});
+</script>
+
+
+
+
+</body>
+</html>
