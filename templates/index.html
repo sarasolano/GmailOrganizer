@@ -266,18 +266,19 @@
       </div>
     </div>
     <style>
-    .fold {
-    border-radius: 25px;
-    width: 200px;
-    height: 150px;
-    text-align: center;
-    }
-    .folder_name {
-        display: inline-block;
-        text-align: center;
-        font-family: sans-serif;
+    .foldbtn {
+        width: 200px;
+        height: 150px;
+        border: none;
+        border-radius: 25px;
         color: white;
-        font-weight: bold;
+        padding: 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 28px;
+        margin: 4px 2px;
+        cursor: pointer;
     }
 
     </style>
@@ -324,6 +325,7 @@ var favorites = [];
 var num_reminders = 1;
 var num_folders = 0;
 var folder_colors = [ "#007bff","#28a745"," #17a2b8", "#dc3545", "#343a40", "#6c757d"];
+
 $.get('http://localhost:8080/:' + meta("roomName") + '/profile', function(data, status) {
      if (status === "success") {
         num_notifs = data[0].notificationCount;
@@ -350,6 +352,9 @@ $('.notifs').click(function() {
     num_notifs -= 1;
     $('#not_count').text(num_notifs);
 });
+$(document).on("click", ".foldbtn", function(){
+    alert("hey hey");
+});
 $("#remind_button").click(function() {
     $("#remind_table tbody tr td").each(function(i, td){
         if (i%2 != 0) {
@@ -373,25 +378,28 @@ $("#folder_switch").click(function(){
 
     }
 });
+
 $("#new_F").click(function(){
     var folder_n = prompt("Enter Folder Name:");
-    var inner = "<h2 class = folder_name>"+ folder_n+"</h2>"
+    var inner = folder_n;
     if (folder_n == '') {
         alert("Enter a valid folder Name");
-    } else {
+    } else if(folder_n != null) {
         if ((num_folders % 4) == 0) {
             var color= folder_colors[Math.floor(Math.random() * folder_colors.length)];
-            $("#folder_table tbody").append("<tr><td><div class = 'fold' style=' background: "+ color +"'>"+ inner+"</div></td></tr>");
+            $("#folder_table tbody").append("<tr><td><button class = 'foldbtn' style=' background-color: "+ color +"'>"+ inner+"</button></td></tr>");
             num_folders += 1;
         } else {
             var color= folder_colors[Math.floor(Math.random() * folder_colors.length)];
-            $("#folder_table tbody tr:last").append("<td><div class = 'fold' style=' background: "+ color +"'>"+ inner +"</div></td>");
+            $("#folder_table tbody tr:last").append("<td><button class = 'foldbtn' style=' background-color: "+ color +"'>"+ inner+"</button></td>");
             num_folders += 1;
         }
     }
 
 
 });
+
+
 </script>
 
 
