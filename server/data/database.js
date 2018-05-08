@@ -20,11 +20,10 @@ function createTables() {
         + 'NOTIFICATION_TYPE TEXT,'
         + 'notification TEXT, keywords TEXT)';
     const reminders = 'CREATE TABLE IF NOT EXISTS reminders ('
-        + 'id INTEGER PRIMARY KEY AUTOINCREMENT, text TEXT,'
-        + 'REMINDER_TYPE TEXT)';
+        + 'id INTEGER AUTOINCREMENT, text TEXT, user_id TEXT,'
+        + 'REMINDER_TYPE TEXT, PRIMARY KEY (id, user_id))';
     const favorites = 'CREATE TABLE IF NOT EXISTS favorites ('
-        + 'id INTEGER PRIMARY KEY AUTOINCREMENT,'
-        + 'address TEXT , fullName TEXT , user_id TEXT)';
+        + 'address TEXT , fullName TEXT , user_id TEXT, PRIMARY KEY (address, user_id))';
 
     sendQuery(notifications)
     sendQuery(reminders)
@@ -82,7 +81,7 @@ function sendQuery(sql) {
 exports.initilize = getInstance
 
 var addFavorite = function(userId, emailAddress, firstName, lastName) {
-    const sql = 'insert into favorites values(NULL, $2, $3, $4)'
+    const sql = 'insert into favorites values($2, $3, $4)'
     return sendQueryWithArgs(sql, [emailAddress, firstName + ' ' + lastName, userId]);
 }
 
@@ -93,21 +92,35 @@ var getFavorites = function(userId) {
     return sendQueryWithArgs(sql, [userId]);
 }
 
+exports.getFavorites = getFavorites
+
+var deleteFavorite = function(userId, id) {
+    const sql = 'delete from favorites where address = $1 and user_id = $1'
+    return sendQueryWithArgs(sql, [id, userId])
+}
+
+exports.deleteFavorite = deleteFavorite
+
 var addReminder = function(userId, text) {
     const sql = 'insert into reminders values(NULL, $2, $3, $4)'
-    return sendQueryWithArgs(sql, [userId, text, ''])
+    return sendQueryWithArgs(sql, [text, userId, ''])
 }
 
 exports.addReminder = addReminder
 
-var deleteFavorite = function(userId, id) {
-    
+var getReminders = function(userId, reminderId) {
+    const sql = 'select * from reminders where user_id = $1 and id = $2'
+    return sendQueryWithArgs(sql, [userId, reminderId])
 }
 
-var getUser = function(userId) {
-    const sql = 'select * from user when id = $1'
-    return sendQueryWithArgs(sql, [userId])
+exports.getReminders = getReminders
+
+var deleteReminder = function(userId, id) {
+    const sql = 'delete from reminders where id = $1 and user_id = $1'
+    return sendQueryWithArgs(sql, [id, userId])
 }
+
+exports.deleteFavorite = deleteFavorite
 
 
 

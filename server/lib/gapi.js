@@ -33,8 +33,26 @@ var getProfile = async function() {
 
 exports.getProfile = getProfile;
 
-var listEmails = async function() {
+var getMessageList = async function(page, query) {
+  var req = { userId: 'me', auth: gclient.oAuth2Client}
+  if (page != null) {
+    req.pageToken = page
+  } 
+
+  if (query) {
+    req.q = query
+  }
+
   const res = await gmail.users.messages.list({ userId: 'me', auth: gclient.oAuth2Client});
-  console.log(res.data);
-  return res.data;
+  console.log(res);
+  return res;
 }
+
+exports.getMessageList = getMessageList
+
+var getEmailsFromFavorite = async function(favoriteAddress) {
+  var q = 'from:' + favoriteAddress
+  return getMessageList(null, q)
+}
+
+exports.getEmailsFromFavorite = getEmailsFromFavorite

@@ -122,6 +122,33 @@ app.get('/profile', function(req, res) {
 	}).catch(e => console.log(e))
 })
 
+/***************** EMAILS ***********************/
+app.post('/:userId/getEmails', function(req, res) {
+  if (!req.session.token) {
+    res.redirect('/goauth2');
+    return;
+  }
+
+  gapi.client.credentials = req.session.token;
+  gapi.getMessageList(req.page, '').then(d => {
+    console.log(d.resultSizeEstimate)
+    res.send(d);
+  })
+})
+
+app.post('/:userId/getEmailsFromFavorite', function(req, res) {
+  if (!req.session.token) {
+    res.redirect('/goauth2')
+    return
+  }
+
+  gapi.client.credentials = req.session.token;
+  gapi.getEmailsFromFavorite(req.email).then(d => {
+    console.log(d.resultSizeEstimate)
+    res.send(d);
+  })
+})
+
 
 /******** USER.REMINDERS ************/
 
@@ -129,7 +156,18 @@ app.post('/:userId/addReminder', function(req, res) {
   res.send(database.addReminder(req.params.userId, req.text))
 })
 
+app.post('/:userId/getReminders', function(req, res) {
+  res.send(database.getReminders(req.params.userId))
+})
+
+app.post('/:userId/deleteReminder', function(req, res) {
+  res.send(database.deleteReminder(req.params.userId, req.reminderId))
+})
+
 /******** USER.FAVORITES ************/
+app.post('/:userId/getFavorites', function(req, res) {
+  res.send(database.getFavorites(req.params.userId))
+})
 
 // create
 app.post('/:userId/addFavorite', function(req, res) {
@@ -138,7 +176,9 @@ app.post('/:userId/addFavorite', function(req, res) {
 })  
 
 // delete
-app.post('/:userId/favorites/:id')
+app.post('/:userId/deleteFavorite', function(req,res) {
+  res.send(database.deleteFavorite(req.params.userId, req.body.email))
+})
 
 
 /*************** USER.NOTIFICATIONS ***************/
