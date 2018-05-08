@@ -53,6 +53,7 @@ app.get('/', function(req, res) {
 
 // start page. Shows google log-in button
 app.get('/login', function (req, res) {
+  database.initilize()
 	res.render('login.html');	
 })
 
@@ -153,31 +154,32 @@ app.post('/:userId/getEmailsFromFavorite', function(req, res) {
 /******** USER.REMINDERS ************/
 
 app.post('/:userId/addReminder', function(req, res) {
-  res.send(database.addReminder(req.params.userId, req.text))
+  database.addReminder(req.params.userId, req.body.text, (data) => {res.send(data)})
 })
 
 app.post('/:userId/getReminders', function(req, res) {
-  res.send(database.getReminders(req.params.userId))
+  database.getReminders(req.params.userId, (data) => {res.send(data)})
+  
 })
 
 app.post('/:userId/deleteReminder', function(req, res) {
-  res.send(database.deleteReminder(req.params.userId, req.reminderId))
+  database.deleteReminder(req.params.userId, req.body.text, (data) => {res.send(data)})
 })
 
 /******** USER.FAVORITES ************/
 app.post('/:userId/getFavorites', function(req, res) {
-  res.send(database.getFavorites(req.params.userId))
+  database.getFavorites(req.params.userId, (data) => {res.send(data)})
 })
 
 // create
 app.post('/:userId/addFavorite', function(req, res) {
-  res.send(database.addFavorite(req.params.userId, 
-    req.body.email, req.body.firstName, req.body.lastName))
+  database.addFavorite(req.params.userId, 
+    req.body.email, req.body.firstName, req.body.lastName, (data) => {res.send(data)})
 })  
 
 // delete
 app.post('/:userId/deleteFavorite', function(req,res) {
-  res.send(database.deleteFavorite(req.params.userId, req.body.email))
+ database.deleteFavorite(req.params.userId, req.body.email, (data) => {res.send(data)})
 })
 
 

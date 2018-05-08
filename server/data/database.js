@@ -20,8 +20,8 @@ function createTables() {
         + 'NOTIFICATION_TYPE TEXT,'
         + 'notification TEXT, keywords TEXT)';
     const reminders = 'CREATE TABLE IF NOT EXISTS reminders ('
-        + 'id INTEGER AUTOINCREMENT, text TEXT, user_id TEXT,'
-        + 'REMINDER_TYPE TEXT, PRIMARY KEY (id, user_id))';
+        + 'id INTEGER PRIMARY KEY AUTOINCREMENT, text TEXT, user_id TEXT,'
+        + 'REMINDER_TYPE TEXT)';
     const favorites = 'CREATE TABLE IF NOT EXISTS favorites ('
         + 'address TEXT , fullName TEXT , user_id TEXT, PRIMARY KEY (address, user_id))';
 
@@ -30,7 +30,7 @@ function createTables() {
     sendQuery(favorites)
 }
 
-function sendQueryWithArgs(sql, args) {	
+function sendQueryWithArgs(sql, args, callback) {	
     if (!conn) {
         return {'ok' : false};;
     }
@@ -47,8 +47,9 @@ function sendQueryWithArgs(sql, args) {
                 console.log("no rows were found for query");
             } else {
             	toReturn.data = rows;
-            }    
-        }
+            } 
+        } 
+        callback(toReturn) 
     });
 
     return toReturn
@@ -64,63 +65,54 @@ function sendQuery(sql) {
             console.log('an error was found ', err);
             toReturn.ok = false;
         }
-
-        if (res) {
-            const rows = res.rows
-            if (rows.length == 0) {
-                console.log("no rows were found for query");
-            } else {
-                toReturn.data = rows;
-            }    
-        }
-    });
+    })
 
     return toReturn;
 }
 
 exports.initilize = getInstance
 
-var addFavorite = function(userId, emailAddress, firstName, lastName) {
-    const sql = 'insert into favorites values($2, $3, $4)'
-    return sendQueryWithArgs(sql, [emailAddress, firstName + ' ' + lastName, userId]);
+var addFavorite = function(userId, emailAddress, firstName, lastName, callback) {
+    const sql = 'insert into favorites values($1, $2, $3)'
+    return sendQueryWithArgs(sql, [emailAddress, firstName + ' ' + lastName, userId], callback);
 }
 
 exports.addFavorite = addFavorite
 
-var getFavorites = function(userId) {
-    const sql = 'select * from favorites where user_Id = $1'
-    return sendQueryWithArgs(sql, [userId]);
+var getFavorites = function(userId, callback) {
+    const sql = 'select * from favorites where user_id = $1'
+    return sendQueryWithArgs(sql, [userId], callback);
 }
 
 exports.getFavorites = getFavorites
 
-var deleteFavorite = function(userId, id) {
+var deleteFavorite = function(userId, id, callback) {
     const sql = 'delete from favorites where address = $1 and user_id = $1'
-    return sendQueryWithArgs(sql, [id, userId])
+    return sendQueryWithArgs(sql, [id, userId], callback)
 }
 
 exports.deleteFavorite = deleteFavorite
 
-var addReminder = function(userId, text) {
-    const sql = 'insert into reminders values(NULL, $2, $3, $4)'
-    return sendQueryWithArgs(sql, [text, userId, ''])
+var addReminder = function(userId, text, callback) {
+    const sql = 'insert into reminders values(NULL, $1, $2, $3)'
+    return sendQueryWithArgs(sql, [text, userId, ''],callback)
 }
 
 exports.addReminder = addReminder
 
-var getReminders = function(userId, reminderId) {
-    const sql = 'select * from reminders where user_id = $1 and id = $2'
-    return sendQueryWithArgs(sql, [userId, reminderId])
+var getReminders = function(userId, callback) {
+    const sql = 'select * from reminders where user_id = $1'
+    return sendQueryWithArgs(sql, [userId], callback)
 }
 
 exports.getReminders = getReminders
 
-var deleteReminder = function(userId, id) {
-    const sql = 'delete from reminders where id = $1 and user_id = $1'
-    return sendQueryWithArgs(sql, [id, userId])
+var deleteReminder = function(userId, text, callback) {
+    const sql = 'delete from reminders where id in (select id from reminders where $1 like text and user_id = $2 limit 1)'
+    return sendQueryWithArgs(sql, [text, userId], callback)
 }
 
-exports.deleteFavorite = deleteFavorite
+exports.deleteReminder = deleteReminder
 
 
 
