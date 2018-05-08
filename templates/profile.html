@@ -9,13 +9,13 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-
+  <link href="https://fonts.googleapis.com/css?family=Leckerli+One|Patua+One" rel="stylesheet">
 </head>
 <body>
     <nav class="navbar">
       <div class="container">
         <div class="navbar-header">
-          <a class="navbar-brand" href="#"><img src="logo.JPG" class="img-rounded" alt="Logo"  width="300" height="auto"></a>
+          <a class="navbar-brand" href="#"><h1 id="name"><span id='G'>G</span>Organizer</h1></a>
         </div>
         <div class="navbar-right">
             <div class="dropdown">
@@ -95,8 +95,8 @@
                 <th>Date</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
+            <tbody id = 'email_list'>
+              <tr class='email'>
                 <td>3</td>
                 <td>sydney@example.com</td>
                 <td>HW5 Due</td>
@@ -256,7 +256,18 @@
         cursor: pointer;
     }
 
-    </style>
+    #name {
+        display: inline-block;
+        font-family: 'Leckerli One', 'Open Sans', cursive;
+        font-weight: 900;
+        font-size: 60px;
+
+    }
+    #G{
+        color: #E57AA3;
+        font-size: 100px;
+    }
+        </style>
 <script type="text/javascript" src="sample.js"></script>
 <script type="text/javascript" src="client.js"></script>
 

@@ -134,7 +134,7 @@ app.post('/:userId/getEmails', function(req, res) {
   gapi.getMessageList(req.page, '').then(d => {
     console.log(d.resultSizeEstimate)
     res.send(d);
-  })
+  }).catch(e => console.log(e))
 })
 
 app.post('/:userId/getEmailsFromFavorite', function(req, res) {

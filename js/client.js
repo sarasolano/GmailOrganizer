@@ -3,9 +3,13 @@ function newContact(event) {
     var first = $("#fn").val().substr(0,$("#fn").val().indexOf(' '));
     var last = $("#fn").val().substr($("#fn").val().indexOf(' ')+1);
     var email = $("#email").val();
-    $('#myTable').append('<tr><td>' + first + '</td><td>'+ last +'</td><td>'+ email + '</td><td><input type="checkbox" class ="contact_check"></td></tr>');
     $.post('/' + meta("userId") + '/addFavorite', {firstName: first, lastName: last, email: email}, function(res){
-        console.log("check");
+        if(res.ok) {
+              $('#myTable').append('<tr><td>' + first + '</td><td>'+ last +'</td><td>'+ email + '</td><td><input type="checkbox" class ="contact_check"></td></tr>');
+        } else {
+            alert("Invalid Contact");
+        }
+        
     });
 }
 function newremind(event) {
@@ -64,8 +68,8 @@ $.post('/' + meta("userId") + '/getFavorites', function(res) {
       for (x = 0; x < data.length; x++) {
             let name = data[x].fullName
             var first = name.substr(0,name.indexOf(' '));
-            var last = name.substr(indexOf(' ')+1);
-              $('#myTable').append('<tr><td>' + first + '</td><td>'+ last +'</td><td>'+ data[x].email + '</td><td><input type="checkbox" class ="contact_check"></td></tr>');
+            var last = name.substr(name.indexOf(' ')+1);
+              $('#myTable').append('<tr><td>' + first + '</td><td>'+ last +'</td><td>'+ data[x].address + '</td><td><input type="checkbox" class ="contact_check"></td></tr>');
           }
 
    }
@@ -79,7 +83,7 @@ $(document).on("click", ".foldbtn", function(){
     alert("hey hey");
 });
 $("#remind_button").click(function() {
-    $("#remind_table tbody tr td").each(function(i, td){
+    $("#remind_table tbody td").each(function(i, td){
         if (i%2 != 0) {
             if($(td).children().is(":checked")) {
                 var text = $(td).prev('td').text();
@@ -96,8 +100,8 @@ $("#remind_button").click(function() {
 });
 
 $("#save_contacts").click(function() {
-    $("#contact_table tbody tr td").each(function(i, td){
-        if (i%4 != 0) {
+    $("#contact_table tbody td").each(function(i, td){
+        if (i%3 == 0) {
             if($(td).children().is(":checked")) {
                 var toRemove = $(td).prev('td').text();
                 $.post('/' + meta("userId") + '/deleteFavorite', {email: toRemove}, function(res){

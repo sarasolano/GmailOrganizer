@@ -87,7 +87,7 @@ var getFavorites = function(userId, callback) {
 exports.getFavorites = getFavorites
 
 var deleteFavorite = function(userId, id, callback) {
-    const sql = 'delete from favorites where address = $1 and user_id = $1'
+    const sql = 'delete from favorites where address = $1 and user_id = $2'
     return sendQueryWithArgs(sql, [id, userId], callback)
 }
 
