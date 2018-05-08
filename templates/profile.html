@@ -17,7 +17,7 @@
         <div class="navbar-header">
           <a class="navbar-brand" href="#"><h1 id="name"><span id='G'>G</span>Organizer</h1></a>
         </div>
-        <div class="navbar-right">
+        <!-- <div class="navbar-right">
             <div class="dropdown">
                 <button class="btn btn-danger dropdown-toggle navbar-btn" type="button"  data-toggle="dropdown" style="margin-top: 50px;">Notifications
                     <span class="badge" id="not_count">3</span>
@@ -28,7 +28,7 @@
                   <li class = "notifs"><a href="#">Notification 3  <span class="glyphicon glyphicon-ok-circle"></span></a></li>
                 </ul>
             </div>
-        </div>
+        </div> -->
         <ul class="nav navbar-nav navbar-right" style="margin-top: 45px; margin-right: 20px;">
             <li><a href="#"><span class="glyphicon glyphicon-user"></span><span id = 'username'></span></a></li>
             <li><a href="#"><span class="glyphicon glyphicon-log-out"></span> <span id='logout'>Logout</span></a></li>
@@ -81,6 +81,12 @@
                     </ul>
                 </div>
             </div>
+            <div class="col-sm-2">
+                <button type="button" class="btn btn-default btn-sm" style=" margin-top: 50px" id ="prev_btn">Previous Page</button>
+                <button type="button" class="btn btn-default btn-sm" style=" margin-top: 50px" id= "next_btn">Next Page</button>
+            </div>
+
+            </div>
           </div>
         </div>
 
@@ -96,7 +102,7 @@
               </tr>
             </thead>
             <tbody id = 'email_list'>
-              <tr class='email'>
+              <tr>
                 <td>3</td>
                 <td>sydney@example.com</td>
                 <td>HW5 Due</td>

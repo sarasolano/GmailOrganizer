@@ -9,7 +9,7 @@ function newContact(event) {
         } else {
             alert("Invalid Contact");
         }
-        
+
     });
 }
 function newremind(event) {
@@ -46,6 +46,10 @@ var user_id = -1;
 var favorites = [];
 var num_reminders = 0;
 var num_folders = 0;
+var page_token = {};
+var page_number = 0;
+var more_emails = true;
+
 var folder_colors = [ "#007bff","#28a745"," #17a2b8", "#dc3545", "#343a40", "#6c757d"];
 
 $.post('/'+ meta("userId") + '/getReminders', function(res) {
@@ -74,6 +78,62 @@ $.post('/' + meta("userId") + '/getFavorites', function(res) {
 
    }
 });
+
+
+$.post('/' + meta("userId") + '/getEmails', function(res) {
+   if (res && res.ok) {
+    let data = res.data
+    page_token[page_number] = res.page_token;
+    if (data.length < 25) { more_emails = false;}
+      for (x = 0; x < data.length; x++) {
+            let subject = data[x].subject;
+            var date = data[x].date;
+            var sender = data[x].sender;
+              $('#email_list').append('<tr><td>0<td><td>' + first + '</td><td>'+ sender +'</td><td>'+ subject + '</td><td>>'+ date +'</td></tr>');
+          }
+
+   }
+});
+
+$("#next_btn").click(function(){
+    if (more_emails) {
+        token = page_token[page_number];
+            $.post('/' + meta("userId") + '/getEmails', {page_token: token}, function(res) {
+               if (res && res.ok) {
+                let data = res.data;
+                page_number += 1;
+                page_token[page_number] = res.page_token;
+                  for (x = 0; x < data.length; x++) {
+                        let subject = data[x].subject;
+                        var date = data[x].date;
+                        var sender = data[x].sender;
+                          $('#email_list').append('<tr><td>0<td><td>' + first + '</td><td>'+ sender +'</td><td>'+ subject + '</td><td>>'+ date +'</td></tr>');
+                      }
+
+               }
+            });
+    }
+});
+
+$("#prev_btn").click(function(){
+        if (page_number >= 1){
+            page_number -= 1
+            token = page_token[page_number];
+            $.post('/' + meta("userId") + '/getEmails', {page_token: token}, function(res) {
+               if (res && res.ok) {
+                let data = res.data;
+                  for (x = 0; x < data.length; x++) {
+                        let subject = data[x].subject;
+                        var date = data[x].date;
+                        var sender = data[x].sender;
+                          $('#email_list').append('<tr><td>0<td><td>' + first + '</td><td>'+ sender +'</td><td>'+ subject + '</td><td>>'+ date +'</td></tr>');
+                      }
+               }
+            });
+        }
+});
+
+
 $('.notifs').click(function() {
     $(this).remove();
     num_notifs -= 1;
