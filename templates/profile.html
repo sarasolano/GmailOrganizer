@@ -142,35 +142,16 @@
               <h4 class="modal-title">Favorites</h4>
             </div>
             <div class="modal-body">
-                <table class="table table-bordered table-striped">
+                <table class="table table-bordered table-striped" id="contact_table">
                   <thead>
                     <tr>
                       <th>Firstname</th>
                       <th>Lastname</th>
                       <th>Email</th>
+                      <th>Remove Favorite</th>
                     </tr>
                   </thead>
                   <tbody id="myTable">
-                    <tr>
-                      <td>John</td>
-                      <td>Doe</td>
-                      <td>john@example.com</td>
-                    </tr>
-                    <tr>
-                      <td>Mary</td>
-                      <td>Moe</td>
-                      <td>mary@mail.com</td>
-                    </tr>
-                    <tr>
-                      <td>July</td>
-                      <td>Dooley</td>
-                      <td>july@greatstuff.com</td>
-                    </tr>
-                    <tr>
-                      <td>Anja</td>
-                      <td>Ravendale</td>
-                      <td>a_r@test.com</td>
-                    </tr>
                   </tbody>
                 </table>
                 <h3>New Contact Favorite:</h3>
@@ -189,7 +170,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" id = "save_contacts">Save Changes</button>
             </div>
           </div>
         </div>
@@ -218,7 +199,7 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td>Send Draft to Jimmy</td>
+                        <td>Send Draft to Jimmy<span hidden>123456</span></td>
                         <td>
                             <input type="checkbox" class ="remind_check">
                         </td>
@@ -299,12 +280,15 @@ function newremind(event) {
     var text = $("#reminder_text").val();
     $("#new_R")[0].reset();
     if (text != '') {
-        $('#remind_table').append('<tr><td>' + text + '</td><td><input type="checkbox" class ="remind_check"></td></tr>');
         num_reminders += 1;
         $('#remind_count').text(num_reminders);
+        var id = 0;
         $.post('/' + meta("userId") + '/addReminder', {reminder_text: text}, function(res){
-            console.log("check");
+            id = res.data[0].id;
+            console.log(res.data[0].id)
         });
+
+        $('#remind_table').append('<tr><td>' + text + '<span hidden>'+ id +'</span></td><td><input type="checkbox" class ="remind_check"></td></tr>');
     }
 }
 function meta(name) {
@@ -328,27 +312,33 @@ var num_reminders = 1;
 var num_folders = 0;
 var folder_colors = [ "#007bff","#28a745"," #17a2b8", "#dc3545", "#343a40", "#6c757d"];
 
-// $.get('http://localhost:8080/profile', function(data, status) {
-//      if (status === "success") {
-//         num_notifs = data[0].notificationCount;
-//         user_email = data[0].email;
-//         user_id = data[0].user_id;
-//         $("#username").text(user_email);
-//         $('#not_count').text(num_notifs);
-//      } else {
-//         console.log(status)
-//      }
-//   });
-// $.get('http://localhost:8080/:' + meta("userId") + '/favorites', function(data, status) {
-//    if (status === "success") {
-//       favorites = data;
-//       for (x = 0; x < data.length; x++) {
-//               $('#myTable').append('<tr><td>' + data[x].first + '</td><td>'+ data[x].last +'</td><td>'+ data[x].email + '</td></tr>');
-//           }
-//    } else {
-//       console.log(status)
-//    }
-// });
+$.get('/'+ meta("userId") + '/getReminders', function(data, status) {
+     if (status === "success") {
+         $('#remind_table').append('<tr><td>' + text + '<span hidden>'+ id +'</span></td><td><input type="checkbox" class ="remind_check"></td></tr>');
+
+         for (x = 0; x < data.length; x++) {
+            text = data[x].text;
+            id = data[x].id;
+            $('#remind_table').append('<tr><td>' + text + '<span hidden>'+ id +'</span></td><td><input type="checkbox" class ="remind_check"></td></tr>');
+            }
+     } else {
+        console.log(status)
+     }
+  });
+$.get('/' + meta("userId") + '/getFavorites', function(data, status) {
+   if (status === "success") {
+       var first = data[x].name.indexOf(' '));
+       var last = data[x].name.indexOf(' ')+1);
+      for (x = 0; x < data.length; x++) {
+            var first = data[x].name.indexOf(' '));
+            var last = data[x].name.indexOf(' ')+1);
+              $('#myTable').append('<tr><td>' + first + '</td><td>'+ last +'</td><td>'+ data[x].email + '</td></tr>');
+          }
+
+   } else {
+      console.log(status)
+   }
+});
 $('.notifs').click(function() {
     $(this).remove();
     num_notifs -= 1;
@@ -361,13 +351,31 @@ $("#remind_button").click(function() {
     $("#remind_table tbody tr td").each(function(i, td){
         if (i%2 != 0) {
             if($(td).children().is(":checked")) {
+                var remindID = $(td).prev('td').children('span').text();
                 $(td).parent().remove();
                 num_reminders -= 1;
+                $.post('/' + meta("userId") + '/deleteReminder', {id: toRemove}, function(res){
+                });
             }
         }
     });
     $('#remind_count').text(num_reminders);
 });
+
+$("#save_contacts").click(function() {
+    $("#contact_table tbody tr td").each(function(i, td){
+        if (i%4 != 0) {
+            if($(td).children().is(":checked")) {
+                var toRemove = $(td).prev('td').text();
+                $(td).parent().remove();
+                $.post('/' + meta("userId") + '/deleteFavorite', {email: toRemove}, function(res){
+                });
+            }
+        }
+    });
+    $('#remind_count').text(num_reminders);
+});
+
 $("#folder_switch").click(function(){
     if($(this).text() === 'Folder View') {
         $("#emails_holder").hide();
